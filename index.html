@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>POISE — Daily Balance Puzzle</title>
-<meta name="theme-color" content="#0f1f0a">
+<meta name="theme-color" content="#050a03">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Poise">
@@ -12,7 +12,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:           #0f1f0a;
+  --bg:           #050a03;
   --green:        #4b7a2f;
   --green-bright: #6aaa3a;
   --green-text:   #7fc040;
@@ -56,17 +56,17 @@ html, body {
   align-items: center;
   gap: 8px;
   margin: 5px 0;
-  color: var(--green-dim);
+  color: var(--green-text);
 }
 .rule::before, .rule::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--green-dim) 30%, var(--green-dim) 70%, transparent);
+  background: linear-gradient(90deg, transparent, var(--green-text) 30%, var(--green-text) 70%, transparent);
 }
 .rule-diamond {
   width: 5px; height: 5px;
-  background: var(--green);
+  background: var(--green-text);
   transform: rotate(45deg);
   flex-shrink: 0;
 }
@@ -82,7 +82,7 @@ html, body {
 #subtitle {
   font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   font-size: 9px;
-  color: var(--green);
+  color: var(--green-text);
   letter-spacing: 3px;
   text-transform: uppercase;
   margin-top: 2px;
@@ -148,14 +148,14 @@ html, body {
   inset: -1px;
   pointer-events: none;
   background-image:
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim));
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text));
   background-size:
     14px 1px, 1px 14px, 14px 1px, 1px 14px,
     14px 1px, 1px 14px, 14px 1px, 1px 14px;
@@ -219,7 +219,7 @@ html, body {
   text-align: center;
   font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   font-size: 9px; letter-spacing: 3px;
-  color: var(--green-dim);
+  color: var(--green-text);
   text-transform: uppercase;
   pointer-events: none;
   transition: color .4s;
@@ -231,7 +231,7 @@ html, body {
   top: 8px; right: 10px;
   font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   font-size: 10px;
-  color: var(--green-dim);
+  color: var(--green-text);
   font-variant-numeric: tabular-nums;
   transition: color .4s;
 }
@@ -254,14 +254,14 @@ html, body {
   position: absolute; inset: -1px;
   pointer-events: none;
   background-image:
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim));
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text));
   background-size: 10px 1px, 1px 10px, 10px 1px, 1px 10px, 10px 1px, 1px 10px, 10px 1px, 1px 10px;
   background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right, bottom right;
   background-repeat: no-repeat;
@@ -272,7 +272,7 @@ html, body {
   text-align: center;
   font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   font-size: 8px; letter-spacing: 3px;
-  color: var(--green-dim);
+  color: var(--green-text);
   text-transform: uppercase;
   pointer-events: none;
 }
@@ -286,8 +286,8 @@ html, body {
   margin-bottom: 0;
   width: 100%;
   background: transparent;
-  border: 1px solid var(--green-faint);
-  color: var(--green-dim);
+  border: 1px solid var(--green-dim);
+  color: var(--green-text);
   font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   font-size: 11px; font-weight: 500;
   letter-spacing: 6px; text-indent: 6px;
@@ -301,14 +301,14 @@ html, body {
   position: absolute; inset: -1px;
   pointer-events: none;
   background-image:
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim)),
-    linear-gradient(var(--green-dim), var(--green-dim));
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text)),
+    linear-gradient(var(--green-text), var(--green-text));
   background-size: 10px 1px, 1px 10px, 10px 1px, 1px 10px, 10px 1px, 1px 10px, 10px 1px, 1px 10px;
   background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right, bottom right;
   background-repeat: no-repeat;
@@ -341,9 +341,8 @@ html, body {
   text-align: center;
   font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   font-size: 8px;
-  letter-spacing: 2.5px;
-  color: var(--green-dim);
-  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--green-text);
 }
 
 /* ── Balls ── */
@@ -375,7 +374,7 @@ html, body {
   position: fixed;
   bottom: 0; left: 0; right: 0;
   transform: translateY(110%);
-  background-color: #0d1a09;
+  background-color: #050a03;
   background-image:
     repeating-linear-gradient( 45deg, transparent 0, transparent 14px, rgba(75,122,47,.02) 14px, rgba(75,122,47,.02) 15px),
     repeating-linear-gradient(-45deg, transparent 0, transparent 14px, rgba(75,122,47,.02) 14px, rgba(75,122,47,.02) 15px);
@@ -435,7 +434,7 @@ html, body {
 #rp-countdown { text-align: right; }
 #rp-next-lbl {
   font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
-  font-size: 8px; color: var(--green-dim);
+  font-size: 8px; color: var(--green-text);
   letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px;
 }
 #countdown {
@@ -457,7 +456,7 @@ html, body {
 
   <div id="scale-wrap">
     <svg id="scale-svg" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet"
-         fill="none" stroke="#4b7a2f" stroke-linecap="round" stroke-linejoin="round">
+         fill="none" stroke="#7fc040" stroke-linecap="round" stroke-linejoin="round">
       <!-- base pedestal -->
       <line x1="115" y1="98" x2="185" y2="98" stroke-width="1.5"/>
       <line x1="122" y1="94" x2="178" y2="94" stroke-width="0.75"/>
@@ -509,7 +508,7 @@ html, body {
 
   <button id="weigh-btn" disabled>Weigh It</button>
 
-  <div id="footer">◆ &nbsp; Poise &nbsp;·&nbsp; © 2026 &nbsp; ◆</div>
+  <div id="footer">©2026 Poise Balance Game, NeverStopCreating, LLC, info@neverstopcreatingllc.com</div>
 </div>
 
 <!-- Result panel -->
@@ -541,7 +540,7 @@ html, body {
     const s = size / 100; // scale factor
 
     // Background
-    g.fillStyle = '#0f1f0a';
+    g.fillStyle = '#050a03';
     g.beginPath();
     const r = size * 0.18;
     g.moveTo(r, 0); g.lineTo(size - r, 0);
