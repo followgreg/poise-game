@@ -431,6 +431,46 @@ html, body {
   text-align: center; font-size: 10px;
   color: var(--green);
 }
+
+/* ── Try Again button ── */
+#try-again-btn {
+  flex: 1; padding: 10px 0;
+  background: transparent;
+  border: 1px solid var(--green);
+  color: var(--green-text);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s;
+}
+#try-again-btn:active { background: rgba(75,122,47,.12); }
+
+/* ── Attempt history ── */
+#rp-history {
+  margin-bottom: 10px;
+}
+.rp-hist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--green);
+  border-bottom: 1px solid rgba(75,122,47,.1);
+}
+.rp-hist-row:last-child { border-bottom: none; }
+.rp-hist-num {
+  font-size: 9px;
+  letter-spacing: 1px;
+  opacity: 0.55;
+  flex-shrink: 0;
+  width: 16px;
+  text-align: right;
+}
+
 #rp-countdown { text-align: right; }
 #rp-next-lbl {
   font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
@@ -518,9 +558,11 @@ html, body {
     <span id="rp-title">—</span>
   </div>
   <div id="rp-msg">—</div>
+  <div id="rp-history"></div>
   <div id="rp-actions">
-    <button id="share-btn">Share Result<span id="copy-msg"></span></button>
-    <div id="rp-countdown">
+    <button id="try-again-btn" style="display:none">Try Again</button>
+    <button id="share-btn" style="display:none">Share Result<span id="copy-msg"></span></button>
+    <div id="rp-countdown" style="display:none">
       <div id="rp-next-lbl">Next Poise in</div>
       <div id="countdown">—</div>
     </div>
@@ -719,9 +761,12 @@ const DATE = todayET();
 const PNUM = puzzleNum(DATE);
 const SKEY = `poise_v1_${PNUM}`;
 
-let balls = generateBalls(DATE);
-let dead  = false;
-let drag  = null;
+let balls    = generateBalls(DATE);
+let dead     = false;
+let drag     = null;
+let attempts = [];          // array of { won, pct, heavier, lIds, rIds }
+let cdInterval = null;      // countdown setInterval handle
+const MAX_TRIES = 3;
 
 // ══════════════════════════════════════════
 // DOM
@@ -898,13 +943,18 @@ weighBtn.addEventListener('click', function weigh() {
   const pct  = Math.round(diff/avg*100);
   const won  = diff/avg < 0.0001;
 
+  const res = { won, pct, heavier: lArea>rArea?'left':'right',
+    lIds: lBalls.map(b=>b.id), rIds: rBalls.map(b=>b.id) };
+  attempts.push(res);
+  const done = won || attempts.length >= MAX_TRIES;
+
   beamG.classList.remove('anim-win','anim-left','anim-right');
   void beamG.getBoundingClientRect();
-  if (won)             beamG.classList.add('anim-win');
+  if (won)              beamG.classList.add('anim-win');
   else if (lArea>rArea) beamG.classList.add('anim-right');
-  else                 beamG.classList.add('anim-left');
+  else                  beamG.classList.add('anim-left');
 
-  dead = true;
+  dead = done;
   weighBtn.disabled = true; weighBtn.className = '';
   Object.values(ballEls).forEach(el => el.classList.add('locked','revealed'));
   cntL.textContent = fmt(Math.PI*lArea);
@@ -916,35 +966,88 @@ weighBtn.addEventListener('click', function weigh() {
     (lArea>rArea ? zoneL : zoneR).classList.add('zone-heavy','revealed');
     (lArea>rArea ? zoneR : zoneL).classList.add('zone-light','revealed');
   }
-  appEl.classList.add('game-over');
+  if (done) appEl.classList.add('game-over');
   requestAnimationFrame(() => requestAnimationFrame(layoutAll));
-  const res = { won, pct, heavier: lArea>rArea?'left':'right',
-    lIds: lBalls.map(b=>b.id), rIds: rBalls.map(b=>b.id) };
-  localStorage.setItem(SKEY, JSON.stringify(res));
-  setTimeout(() => showResult(res), won ? 1600 : 900);
+  localStorage.setItem(SKEY, JSON.stringify({ attempts, done }));
+  setTimeout(() => showResult(res, done), won ? 1600 : 900);
 });
 
 // ══════════════════════════════════════════
 // RESULT PANEL
 // ══════════════════════════════════════════
-function showResult(res) {
-  panel.classList.toggle('win', res.won);
-  panel.classList.add('show');
-  $('rp-icon').textContent  = res.won ? '✨' : '⚖️';
-  $('rp-title').textContent = res.won ? 'Perfectly Poised' : 'Off Balance';
-  $('rp-msg').textContent   = res.won
-    ? 'The scale holds perfectly level.'
-    : `${res.heavier==='left'?'Left':'Right'} side is heavier (+${res.pct}%)`;
-  shareBtn.onclick = () => doShare(res);
-  tickCountdown();
-  setInterval(tickCountdown, 1000);
+function attemptLabel(a) {
+  if (a.won) return '✨ Perfectly Poised';
+  const dir = a.heavier === 'left' ? '⬅️' : '➡️';
+  return `${dir} ${a.heavier==='left'?'Left':'Right'} heavier (+${a.pct}%)`;
 }
 
-function doShare(res) {
-  const d = '⚫⚫⚫⚫⚫';
-  const l2 = res.won ? 'Perfectly Poised ✨'
-    : `${res.heavier==='left'?'Left':'Right'} was heavier (+${res.pct}%)`;
-  navigator.clipboard.writeText(`POISE #${PNUM} ⚖️\n${l2}\n${d} | ${d}`)
+function showResult(res, done) {
+  panel.classList.toggle('win', res.won);
+  panel.classList.add('show');
+  $('rp-icon').textContent = res.won ? '✨' : '⚖️';
+  if (res.won) {
+    $('rp-title').textContent = 'Perfectly Poised';
+    $('rp-msg').textContent   = 'The scale holds perfectly level.';
+  } else if (!done) {
+    $('rp-title').textContent = `Attempt ${attempts.length} of ${MAX_TRIES}`;
+    $('rp-msg').textContent   = `${res.heavier==='left'?'Left':'Right'} side is heavier (+${res.pct}%)`;
+  } else {
+    $('rp-title').textContent = 'Off Balance';
+    $('rp-msg').textContent   = `${res.heavier==='left'?'Left':'Right'} side is heavier (+${res.pct}%)`;
+  }
+
+  // History: show all previous attempts (not the current one)
+  const histEl = $('rp-history');
+  const prev = attempts.slice(0, -1);
+  if (prev.length > 0) {
+    histEl.innerHTML = prev.map((a, i) =>
+      `<div class="rp-hist-row"><span class="rp-hist-num">${i+1}</span><span>${attemptLabel(a)}</span></div>`
+    ).join('');
+    histEl.style.display = '';
+  } else {
+    histEl.innerHTML = '';
+    histEl.style.display = 'none';
+  }
+
+  // Try Again button (only when not done)
+  const tryBtn = $('try-again-btn');
+  tryBtn.style.display = (!done) ? '' : 'none';
+  tryBtn.onclick = tryAgain;
+
+  // Share button + countdown (only when done)
+  shareBtn.style.display = done ? '' : 'none';
+  $('rp-countdown').style.display = done ? '' : 'none';
+  shareBtn.onclick = () => doShare();
+  if (done) {
+    if (cdInterval) clearInterval(cdInterval);
+    tickCountdown();
+    cdInterval = setInterval(tickCountdown, 1000);
+  }
+}
+
+function tryAgain() {
+  panel.classList.remove('show', 'win');
+  setTimeout(() => {
+    balls.forEach(b => b.loc = 'staging');
+    Object.values(ballEls).forEach(el => el.classList.remove('locked','revealed'));
+    zoneL.classList.remove('zone-win','zone-heavy','zone-light','revealed');
+    zoneR.classList.remove('zone-win','zone-heavy','zone-light','revealed');
+    beamG.classList.remove('anim-win','anim-left','anim-right');
+    beamG.style.transform = '';
+    dead = false;
+    appEl.classList.remove('game-over');
+    layoutAll();
+    refreshUI();
+  }, 220);
+}
+
+function doShare() {
+  const lines = [`POISE #${PNUM} ⚖️`];
+  const won = attempts.some(a => a.won);
+  if (won && attempts.length > 1)       lines.push(`Solved in ${attempts.length}/${MAX_TRIES}`);
+  else if (!won)                         lines.push(`X/${MAX_TRIES}`);
+  attempts.forEach(a => lines.push(attemptLabel(a)));
+  navigator.clipboard.writeText(lines.join('\n'))
     .then(()=>{ $('copy-msg').textContent='Copied!'; setTimeout(()=>$('copy-msg').textContent='',2000); })
     .catch(()=>{ $('copy-msg').textContent='Copy failed'; });
 }
@@ -967,7 +1070,7 @@ function tickCountdown() {
 // ══════════════════════════════════════════
 // RESTORE
 // ══════════════════════════════════════════
-function applyResult(res) {
+function applyResult(res, done) {
   Object.values(ballEls).forEach(el => el.classList.add('locked','revealed'));
   const lA = balls.filter(b=>b.loc==='left').reduce((s,b)=>s+b.r*b.r,0);
   const rA = balls.filter(b=>b.loc==='right').reduce((s,b)=>s+b.r*b.r,0);
@@ -980,21 +1083,34 @@ function applyResult(res) {
     (res.heavier==='left' ? zoneL : zoneR).classList.add('zone-heavy','revealed');
     (res.heavier==='left' ? zoneR : zoneL).classList.add('zone-light','revealed');
   }
-  appEl.classList.add('game-over');
+  if (done) appEl.classList.add('game-over');
 }
 
 function restore() {
   const raw = localStorage.getItem(SKEY);
   if (!raw) return false;
   try {
-    const res = JSON.parse(raw);
-    res.lIds.forEach(id => { const b=balls.find(b=>b.id===+id); if(b) b.loc='left'; });
-    res.rIds.forEach(id => { const b=balls.find(b=>b.id===+id); if(b) b.loc='right'; });
-    dead = true;
+    const saved = JSON.parse(raw);
+    // Support legacy format (single result object) and new format ({ attempts, done })
+    let savedAttempts, done;
+    if (Array.isArray(saved.attempts)) {
+      savedAttempts = saved.attempts;
+      done = saved.done;
+    } else {
+      savedAttempts = [saved]; // legacy
+      done = true;
+    }
+    if (!savedAttempts.length) return false;
+
+    attempts = savedAttempts;
+    const lastRes = savedAttempts[savedAttempts.length - 1];
+    lastRes.lIds.forEach(id => { const b=balls.find(b=>b.id===+id); if(b) b.loc='left'; });
+    lastRes.rIds.forEach(id => { const b=balls.find(b=>b.id===+id); if(b) b.loc='right'; });
+    dead = done;
     beamG.style.animation = 'none';
-    if (!res.won) beamG.style.transform = res.heavier==='left' ? 'rotate(-9deg)' : 'rotate(9deg)';
-    applyResult(res);
-    requestAnimationFrame(() => { layoutAll(); setTimeout(()=>showResult(res), 250); });
+    if (!lastRes.won) beamG.style.transform = lastRes.heavier==='left' ? 'rotate(-9deg)' : 'rotate(9deg)';
+    applyResult(lastRes, done);
+    requestAnimationFrame(() => { layoutAll(); setTimeout(()=>showResult(lastRes, done), 250); });
     return true;
   } catch(e) { return false; }
 }
