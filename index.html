@@ -689,8 +689,8 @@ weighBtn.addEventListener('click', function weigh() {
   beam.classList.remove('anim-win','anim-left','anim-right');
   void beam.offsetWidth;
   if (won)             beam.classList.add('anim-win');
-  else if (lArea > rArea) beam.classList.add('anim-left');
-  else                 beam.classList.add('anim-right');
+  else if (lArea > rArea) beam.classList.add('anim-right'); // left heavy → left end sinks
+  else                 beam.classList.add('anim-left');     // right heavy → right end sinks
 
   dead = true;
   weighBtn.disabled = true;
@@ -810,7 +810,7 @@ function restore() {
     res.rIds.forEach(id => { const b = balls.find(b => b.id === +id); if (b) b.loc = 'right'; });
     dead = true;
     beam.style.animation = 'none';
-    if (!res.won) beam.style.transform = res.heavier === 'left' ? 'rotate(9deg)' : 'rotate(-9deg)';
+    if (!res.won) beam.style.transform = res.heavier === 'left' ? 'rotate(-9deg)' : 'rotate(9deg)';
     applyResult(res);
     requestAnimationFrame(() => {
       layoutAll();
