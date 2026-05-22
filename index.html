@@ -7,11 +7,26 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+:root {
+  --bg:           #0b0f09;
+  --green:        #4b7a2f;
+  --green-bright: #6aaa3a;
+  --green-text:   #7fc040;
+  --green-dim:    #1e3212;
+  --green-faint:  #131c0d;
+  --red:          #943020;
+  --red-bright:   #c04030;
+}
+
 html, body {
   width: 100%; height: 100%;
-  background: #0f0e0c;
-  color: #e8e4dc;
-  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  background-color: var(--bg);
+  /* subtle diagonal crosshatch — engraving texture */
+  background-image:
+    repeating-linear-gradient( 45deg, transparent 0, transparent 14px, rgba(75,122,47,.028) 14px, rgba(75,122,47,.028) 15px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 14px, rgba(75,122,47,.028) 14px, rgba(75,122,47,.028) 15px);
+  color: var(--green-text);
+  font-family: 'Georgia', 'Times New Roman', serif;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
@@ -24,82 +39,74 @@ html, body {
   height: 100dvh;
   max-width: 480px;
   margin: 0 auto;
-  padding: 0 14px;
+  padding: 0 16px;
 }
 
 /* ── Header ── */
 #header {
-  padding: 16px 0 6px;
+  padding: 14px 0 4px;
   text-align: center;
   flex-shrink: 0;
 }
-#title {
-  font-size: 28px;
-  font-weight: 900;
-  letter-spacing: 12px;
-  text-transform: uppercase;
-  color: #e8e4dc;
-}
-#subtitle {
-  font-size: 11px;
-  color: #484848;
-  letter-spacing: 2px;
-  margin-top: 5px;
-  text-transform: uppercase;
-}
 
-/* ── Scale ── */
-#scale-wrap {
-  height: 96px;
-  position: relative;
+/* decorative rule */
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  color: var(--green-dim);
+}
+.rule::before, .rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green-dim) 30%, var(--green-dim) 70%, transparent);
+}
+.rule-diamond {
+  width: 5px; height: 5px;
+  background: var(--green);
+  transform: rotate(45deg);
   flex-shrink: 0;
 }
-#beam {
-  position: absolute;
-  bottom: 22px;
-  left: 8%;
-  width: 84%;
-  height: 5px;
-  background: linear-gradient(90deg, #4a4a4a, #999, #4a4a4a);
-  border-radius: 3px;
-  transform-origin: 50% 50%;
+
+#title {
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 16px;
+  text-indent: 16px; /* compensate for letter-spacing on last char */
+  text-transform: uppercase;
+  color: var(--green-text);
+  /* engraving text shadow: raised ink effect */
+  text-shadow: 0 0 20px rgba(106,170,58,.18), 0 1px 0 rgba(0,0,0,.9);
 }
-#hook-l, #hook-r {
-  position: absolute;
-  top: 5px;
-  width: 3px;
-  height: 26px;
-  background: #555;
-  border-radius: 1px;
-}
-#hook-l { left: 0; transform: translateX(-50%); }
-#hook-r { right: 0; transform: translateX(50%); }
-#fulcrum-dot {
-  position: absolute;
-  bottom: 44px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 13px; height: 13px;
-  background: #888;
-  border-radius: 50%;
-  z-index: 2;
-}
-#fulcrum-post {
-  position: absolute;
-  bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 4px; height: 50px;
-  background: #444;
-  border-radius: 2px;
-}
-#base-bar {
-  position: absolute;
-  bottom: 0; left: 22%; right: 22%;
-  height: 3px;
-  background: #2e2e2e;
-  border-radius: 2px;
+#subtitle {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--green);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 2px;
 }
 
+/* ── Scale SVG wrap ── */
+#scale-wrap {
+  height: 104px;
+  flex-shrink: 0;
+  position: relative;
+}
+#scale-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* beam group animation */
+#scale-beam-g {
+  transform-box: view-box;
+  transform-origin: 150px 40px;
+}
 @keyframes beam-win {
   0%   { transform: rotate(0deg); }
   12%  { transform: rotate(8deg); }
@@ -112,15 +119,15 @@ html, body {
 }
 @keyframes beam-left {
   0%   { transform: rotate(0deg); }
-  45%  { transform: rotate(12deg); }
-  72%  { transform: rotate(8.5deg); }
-  100% { transform: rotate(9deg); }
-}
-@keyframes beam-right {
-  0%   { transform: rotate(0deg); }
   45%  { transform: rotate(-12deg); }
   72%  { transform: rotate(-8.5deg); }
   100% { transform: rotate(-9deg); }
+}
+@keyframes beam-right {
+  0%   { transform: rotate(0deg); }
+  45%  { transform: rotate(12deg); }
+  72%  { transform: rotate(8.5deg); }
+  100% { transform: rotate(9deg); }
 }
 .anim-win   { animation: beam-win  1.5s ease-out forwards; }
 .anim-left  { animation: beam-left 0.8s ease-out forwards; }
@@ -134,116 +141,261 @@ html, body {
   min-height: 0;
   margin-bottom: 10px;
 }
+
 .zone {
   flex: 1;
-  border: 1.5px dashed #252525;
-  border-radius: 10px;
   position: relative;
-  transition: border-color .3s, background .15s;
-  overflow: hidden;
+  background: transparent;
+  transition: background .15s;
+  /* faint fill border */
+  border: 1px solid var(--green-faint);
 }
+
+/* corner bracket overlay — 8 gradient approach */
+.zone::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim));
+  background-size:
+    14px 1px, 1px 14px,
+    14px 1px, 1px 14px,
+    14px 1px, 1px 14px,
+    14px 1px, 1px 14px;
+  background-position:
+    top left,    top left,
+    top right,   top right,
+    bottom left, bottom left,
+    bottom right,bottom right;
+  background-repeat: no-repeat;
+  transition: background-image .3s;
+}
+
 .zone.over {
-  border-color: #555;
-  background: rgba(255,255,255,0.025);
+  background: rgba(75,122,47,.04);
 }
-/* post-weigh zone colors */
-.zone.zone-win    { border-color: #2ed573; border-style: solid; }
-.zone.zone-heavy  { border-color: #ff4757; border-style: solid; }
-.zone.zone-light  { border-color: #3a3a3a; border-style: solid; }
+.zone.over::after {
+  background-image:
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green));
+  background-size:
+    14px 1px, 1px 14px,
+    14px 1px, 1px 14px,
+    14px 1px, 1px 14px,
+    14px 1px, 1px 14px;
+  background-position:
+    top left,    top left,
+    top right,   top right,
+    bottom left, bottom left,
+    bottom right,bottom right;
+  background-repeat: no-repeat;
+}
+
+.zone.zone-win {
+  border-color: var(--green-dim);
+  background: rgba(75,122,47,.04);
+}
+.zone.zone-win::after {
+  background-image:
+    linear-gradient(var(--green-bright), var(--green-bright)),
+    linear-gradient(var(--green-bright), var(--green-bright)),
+    linear-gradient(var(--green-bright), var(--green-bright)),
+    linear-gradient(var(--green-bright), var(--green-bright)),
+    linear-gradient(var(--green-bright), var(--green-bright)),
+    linear-gradient(var(--green-bright), var(--green-bright)),
+    linear-gradient(var(--green-bright), var(--green-bright)),
+    linear-gradient(var(--green-bright), var(--green-bright));
+  background-size:
+    14px 1px, 1px 14px, 14px 1px, 1px 14px,
+    14px 1px, 1px 14px, 14px 1px, 1px 14px;
+  background-position:
+    top left, top left, top right, top right,
+    bottom left, bottom left, bottom right, bottom right;
+  background-repeat: no-repeat;
+}
+
+.zone.zone-heavy { border-color: var(--red); }
+.zone.zone-heavy::after {
+  background-image:
+    linear-gradient(var(--red-bright), var(--red-bright)),
+    linear-gradient(var(--red-bright), var(--red-bright)),
+    linear-gradient(var(--red-bright), var(--red-bright)),
+    linear-gradient(var(--red-bright), var(--red-bright)),
+    linear-gradient(var(--red-bright), var(--red-bright)),
+    linear-gradient(var(--red-bright), var(--red-bright)),
+    linear-gradient(var(--red-bright), var(--red-bright)),
+    linear-gradient(var(--red-bright), var(--red-bright));
+  background-size:
+    14px 1px, 1px 14px, 14px 1px, 1px 14px,
+    14px 1px, 1px 14px, 14px 1px, 1px 14px;
+  background-position:
+    top left, top left, top right, top right,
+    bottom left, bottom left, bottom right, bottom right;
+  background-repeat: no-repeat;
+}
 
 .zone-lbl {
   position: absolute;
   bottom: 8px;
   width: 100%;
   text-align: center;
-  font-size: 10px;
-  letter-spacing: 2.5px;
-  color: #2e2e2e;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--green-dim);
   text-transform: uppercase;
   pointer-events: none;
   transition: color .4s;
 }
-.zone.zone-win .zone-lbl   { color: #2ed573; }
-.zone.zone-heavy .zone-lbl { color: #ff4757; }
+.zone.zone-win .zone-lbl  { color: var(--green); }
+.zone.zone-heavy .zone-lbl { color: var(--red); }
 
 .zone-cnt {
   position: absolute;
   top: 8px; right: 10px;
-  font-size: 11px;
-  color: #363636;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 10px;
+  color: var(--green-dim);
   transition: color .4s;
+  font-variant-numeric: tabular-nums;
 }
-
-/* total weight counter — replaces count after weigh */
-.zone-cnt {
-  transition: color .4s;
-}
-.zone.zone-win.revealed .zone-cnt   { color: #2ed573; font-weight: 700; }
-.zone.zone-heavy.revealed .zone-cnt { color: #ff4757; font-weight: 700; }
-.zone.zone-light.revealed .zone-cnt { color: #555; }
+.zone.zone-win.revealed .zone-cnt   { color: var(--green-bright); font-weight: 600; }
+.zone.zone-heavy.revealed .zone-cnt { color: var(--red-bright); font-weight: 600; }
+.zone.zone-light.revealed .zone-cnt { color: var(--green-dim); }
 
 /* ── Staging ── */
 #staging {
-  height: 118px;
+  height: 112px;
   flex-shrink: 0;
-  border: 1.5px dashed #1e1e1e;
-  border-radius: 10px;
   position: relative;
   margin-bottom: 10px;
+  border: 1px solid var(--green-faint);
   transition: height .35s ease, margin .35s ease, opacity .25s ease;
   overflow: hidden;
 }
+#staging::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim));
+  background-size:
+    10px 1px, 1px 10px, 10px 1px, 1px 10px,
+    10px 1px, 1px 10px, 10px 1px, 1px 10px;
+  background-position:
+    top left, top left, top right, top right,
+    bottom left, bottom left, bottom right, bottom right;
+  background-repeat: no-repeat;
+}
 #staging-lbl {
   position: absolute;
-  top: 6px; width: 100%;
+  top: 7px; width: 100%;
   text-align: center;
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #2a2a2a;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--green-dim);
   text-transform: uppercase;
   pointer-events: none;
 }
-/* collapse staging + button when game over */
-.game-over #staging {
-  height: 0;
-  margin-bottom: 0;
-  opacity: 0;
-}
-.game-over #weigh-btn {
-  height: 0;
-  margin-bottom: 0;
-  opacity: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
+
+/* game-over collapse */
+.game-over #staging { height: 0; margin-bottom: 0; opacity: 0; }
+.game-over #weigh-btn { height: 0; margin-bottom: 0; opacity: 0; pointer-events: none; overflow: hidden; }
 
 /* ── Weigh button ── */
 #weigh-btn {
-  height: 50px;
+  height: 46px;
   flex-shrink: 0;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   width: 100%;
   background: transparent;
-  border: 1.5px solid #252525;
-  border-radius: 8px;
-  color: #3a3a3a;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 5px;
+  border: 1px solid var(--green-faint);
+  color: var(--green-dim);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 6px;
+  text-indent: 6px;
   text-transform: uppercase;
   cursor: not-allowed;
-  transition: border-color .2s, color .2s, box-shadow .2s, height .35s ease, margin .35s ease, opacity .25s ease;
+  position: relative;
+  transition: border-color .2s, color .2s, height .35s ease, margin .35s ease, opacity .25s ease;
 }
+/* button corner brackets */
+#weigh-btn::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim)),
+    linear-gradient(var(--green-dim), var(--green-dim));
+  background-size:
+    10px 1px, 1px 10px, 10px 1px, 1px 10px,
+    10px 1px, 1px 10px, 10px 1px, 1px 10px;
+  background-position:
+    top left, top left, top right, top right,
+    bottom left, bottom left, bottom right, bottom right;
+  background-repeat: no-repeat;
+}
+
 @keyframes pulse-btn {
-  0%, 100% { border-color: #777; box-shadow: none; }
-  50% { border-color: #bbb; box-shadow: 0 0 14px rgba(200,196,188,.15); }
+  0%, 100% { border-color: var(--green-dim); color: var(--green); }
+  50% { border-color: var(--green); color: var(--green-text); box-shadow: 0 0 18px rgba(106,170,58,.12); }
 }
 #weigh-btn.ready {
-  color: #e8e4dc;
   cursor: pointer;
-  animation: pulse-btn 2.2s ease-in-out infinite;
+  animation: pulse-btn 2.4s ease-in-out infinite;
 }
-#weigh-btn.ready:active { background: #181816; }
+#weigh-btn.ready::after {
+  background-image:
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green)),
+    linear-gradient(var(--green), var(--green));
+  background-size:
+    10px 1px, 1px 10px, 10px 1px, 1px 10px,
+    10px 1px, 1px 10px, 10px 1px, 1px 10px;
+  background-position:
+    top left, top left, top right, top right,
+    bottom left, bottom left, bottom right, bottom right;
+  background-repeat: no-repeat;
+}
+#weigh-btn.ready:active { background: rgba(75,122,47,.08); }
 
 /* ── Balls ── */
 .ball {
@@ -256,65 +408,74 @@ html, body {
   align-items: center;
   justify-content: center;
 }
-.ball.dragging {
-  cursor: grabbing;
-  z-index: 99;
-  filter: brightness(1.2);
-}
-.ball.locked { cursor: default; pointer-events: none; }
+.ball.dragging { cursor: grabbing; z-index: 99; filter: brightness(1.2); }
+.ball.locked   { cursor: default; pointer-events: none; }
 
-/* weight label — invisible until revealed */
 .ball-weight {
-  font-weight: 900;
-  color: rgba(255,255,255,0.93);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-weight: 800;
+  color: rgba(255,255,255,.92);
+  text-shadow: 0 1px 4px rgba(0,0,0,.95);
   opacity: 0;
-  transition: opacity 0.55s ease;
+  transition: opacity .55s ease;
   pointer-events: none;
   line-height: 1;
   white-space: nowrap;
 }
-.ball.revealed .ball-weight {
-  opacity: 1;
-}
+.ball.revealed .ball-weight { opacity: 1; }
 
-/* ── Result panel (bottom sheet) ── */
+/* ── Result panel ── */
 #result-panel {
   position: fixed;
   bottom: 0; left: 0; right: 0;
   transform: translateY(110%);
-  background: #111110;
-  border-top: 1px solid #282826;
-  padding: 18px 24px 28px;
+  background-color: #0a0e08;
+  background-image:
+    repeating-linear-gradient( 45deg, transparent 0, transparent 14px, rgba(75,122,47,.022) 14px, rgba(75,122,47,.022) 15px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 14px, rgba(75,122,47,.022) 14px, rgba(75,122,47,.022) 15px);
+  border-top: 1px solid var(--green-dim);
+  padding: 16px 20px 28px;
   z-index: 100;
-  transition: transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+  transition: transform 0.45s cubic-bezier(0.34, 1.15, 0.64, 1);
   max-width: 480px;
   margin: 0 auto;
+}
+#result-panel::before {
+  /* decorative top rule with diamonds */
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green-dim) 20%, var(--green-dim) 80%, transparent);
+  margin-bottom: 14px;
 }
 #result-panel.show { transform: translateY(0); }
 
 #rp-row1 {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
-#rp-icon { font-size: 22px; }
-@keyframes win-pulse { 0%,100%{opacity:.8} 50%{opacity:1} }
-#result-panel.win #rp-icon { animation: win-pulse 2s ease-in-out infinite; }
+#rp-icon { font-size: 18px; line-height: 1; }
+@keyframes win-pulse { 0%,100%{opacity:.75} 50%{opacity:1} }
+#result-panel.win #rp-icon { animation: win-pulse 2.2s ease-in-out infinite; }
 
 #rp-title {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 4px;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 5px;
+  text-indent: 5px;
   text-transform: uppercase;
+  color: var(--green-text);
 }
 #rp-msg {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   text-align: center;
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 16px;
+  font-size: 11px;
+  color: var(--green);
+  margin-bottom: 14px;
+  letter-spacing: 1px;
 }
 #rp-actions {
   display: flex;
@@ -323,42 +484,42 @@ html, body {
 }
 #share-btn {
   flex: 1;
-  padding: 12px 0;
-  background: #e8e4dc;
-  color: #0f0e0c;
-  border: none;
-  border-radius: 7px;
-  font-size: 12px;
-  font-weight: 800;
+  padding: 10px 0;
+  background: transparent;
+  border: 1px solid var(--green);
+  color: var(--green-text);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
   letter-spacing: 3px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background .15s;
+  transition: background .15s, border-color .15s;
   position: relative;
 }
-#share-btn:active { background: #c8c4bc; }
+#share-btn:active { background: rgba(75,122,47,.12); }
 #copy-msg {
   position: absolute;
-  bottom: -18px; left: 0; right: 0;
+  bottom: -17px; left: 0; right: 0;
   text-align: center;
-  font-size: 11px;
-  color: #555;
+  font-size: 10px;
+  color: var(--green);
 }
-#rp-countdown {
-  text-align: right;
-}
+#rp-countdown { text-align: right; }
 #rp-next-lbl {
-  font-size: 9px;
-  color: #3a3a3a;
-  letter-spacing: 1.5px;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 8px;
+  color: var(--green-dim);
+  letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 3px;
 }
 #countdown {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 300;
   letter-spacing: 3px;
-  color: #555;
+  color: var(--green);
   font-variant-numeric: tabular-nums;
 }
 </style>
@@ -367,39 +528,80 @@ html, body {
 
 <div id="app">
   <div id="header">
-    <div id="title">POISE</div>
-    <div id="subtitle">#1 · DAILY BALANCE PUZZLE</div>
+    <div id="title">Poise</div>
+    <div class="rule"><div class="rule-diamond"></div></div>
+    <div id="subtitle">#1 · Daily Balance Puzzle</div>
   </div>
 
+  <!-- Engraved scale SVG -->
   <div id="scale-wrap">
-    <div id="beam">
-      <div id="hook-l"></div>
-      <div id="hook-r"></div>
-    </div>
-    <div id="fulcrum-dot"></div>
-    <div id="fulcrum-post"></div>
-    <div id="base-bar"></div>
+    <svg id="scale-svg" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet"
+         fill="none" stroke="#4b7a2f" stroke-linecap="round" stroke-linejoin="round">
+
+      <!-- Static: base pedestal -->
+      <line x1="115" y1="98" x2="185" y2="98" stroke-width="1.5"/>
+      <line x1="122" y1="94" x2="178" y2="94" stroke-width="0.75"/>
+      <line x1="129" y1="90" x2="171" y2="90" stroke-width="0.5"/>
+
+      <!-- Static: vertical post (double line) -->
+      <line x1="148" y1="90" x2="148" y2="46" stroke-width="0.6"/>
+      <line x1="152" y1="90" x2="152" y2="46" stroke-width="0.6"/>
+
+      <!-- Static: fulcrum diamond -->
+      <path d="M150,34 L156,40 L150,46 L144,40 Z" stroke-width="1"/>
+      <!-- inner diamond detail -->
+      <path d="M150,37 L153,40 L150,43 L147,40 Z" stroke-width="0.4"/>
+
+      <!-- Animated beam group — rotates around fulcrum (150,40) -->
+      <g id="scale-beam-g">
+        <!-- triple-line beam (engraving style) -->
+        <line x1="18" y1="38" x2="282" y2="38" stroke-width="0.4"/>
+        <line x1="18" y1="40" x2="282" y2="40" stroke-width="1.4"/>
+        <line x1="18" y1="42" x2="282" y2="42" stroke-width="0.4"/>
+
+        <!-- beam end caps -->
+        <line x1="18" y1="35" x2="18" y2="45" stroke-width="1"/>
+        <line x1="282" y1="35" x2="282" y2="45" stroke-width="1"/>
+        <!-- tiny diamonds at ends -->
+        <path d="M18,33 L21,36 L18,39 L15,36 Z" stroke-width="0.7"/>
+        <path d="M282,33 L285,36 L282,39 L279,36 Z" stroke-width="0.7"/>
+
+        <!-- left chain (zigzag links) -->
+        <polyline points="18,45 15,51 18,54 15,58 18,61 15,65 18,68" stroke-width="0.8"/>
+        <!-- left pan -->
+        <line x1="18" y1="70" x2="18" y2="72" stroke-width="0.8"/>
+        <ellipse cx="18" cy="75" rx="26" ry="4" stroke-width="1"/>
+        <ellipse cx="18" cy="75" rx="20" ry="2.5" stroke-width="0.4"/>
+
+        <!-- right chain -->
+        <polyline points="282,45 285,51 282,54 285,58 282,61 285,65 282,68" stroke-width="0.8"/>
+        <!-- right pan -->
+        <line x1="282" y1="70" x2="282" y2="72" stroke-width="0.8"/>
+        <ellipse cx="282" cy="75" rx="26" ry="4" stroke-width="1"/>
+        <ellipse cx="282" cy="75" rx="20" ry="2.5" stroke-width="0.4"/>
+      </g>
+    </svg>
   </div>
 
   <div id="zones">
     <div class="zone" id="zone-l">
       <span class="zone-cnt" id="cnt-l">0 / 5</span>
-      <span class="zone-lbl">LEFT</span>
+      <span class="zone-lbl">Left</span>
     </div>
     <div class="zone" id="zone-r">
       <span class="zone-cnt" id="cnt-r">0 / 5</span>
-      <span class="zone-lbl">RIGHT</span>
+      <span class="zone-lbl">Right</span>
     </div>
   </div>
 
   <div id="staging">
-    <span id="staging-lbl">STAGING AREA</span>
+    <span id="staging-lbl">Staging Area</span>
   </div>
 
-  <button id="weigh-btn" disabled>WEIGH IT</button>
+  <button id="weigh-btn" disabled>Weigh It</button>
 </div>
 
-<!-- bottom result panel -->
+<!-- Result panel -->
 <div id="result-panel">
   <div id="rp-row1">
     <span id="rp-icon">⚖️</span>
@@ -408,11 +610,11 @@ html, body {
   <div id="rp-msg">—</div>
   <div id="rp-actions">
     <button id="share-btn">
-      SHARE RESULT
+      Share Result
       <span id="copy-msg"></span>
     </button>
     <div id="rp-countdown">
-      <div id="rp-next-lbl">NEXT POISE IN</div>
+      <div id="rp-next-lbl">Next Poise in</div>
       <div id="countdown">—</div>
     </div>
   </div>
@@ -482,7 +684,6 @@ function generateBalls(dateStr) {
       sol: orig < 5 ? 'left' : 'right', loc: 'staging'
     }));
   }
-  // Balanced fallback
   return [13,17,22,28,33,15,19,24,26,30].map((r, i) => ({
     id: i, r, color: COLORS[i], sol: i < 5 ? 'left' : 'right', loc: 'staging'
   }));
@@ -503,7 +704,7 @@ let drag  = null;
 // DOM
 // ══════════════════════════════════════════
 const $ = id => document.getElementById(id);
-const beam      = $('beam');
+const beamG     = $('scale-beam-g');   // SVG group — animated
 const zoneL     = $('zone-l');
 const zoneR     = $('zone-r');
 const stagingEl = $('staging');
@@ -514,7 +715,7 @@ const cntR      = $('cnt-r');
 const panel     = $('result-panel');
 const shareBtn  = $('share-btn');
 
-$('subtitle').textContent = `#${PNUM} · DAILY BALANCE PUZZLE`;
+$('subtitle').textContent = `#${PNUM} · Daily Balance Puzzle`;
 
 // ══════════════════════════════════════════
 // BALL ELEMENTS
@@ -536,16 +737,12 @@ function makeBall(ball) {
   el.style.width  = d + 'px';
   el.style.height = d + 'px';
   el.style.background = `radial-gradient(circle at 37% 30%, ${lighten(ball.color)} 0%, ${ball.color} 55%, ${ball.color}bb 100%)`;
-  el.style.boxShadow  = '0 3px 10px rgba(0,0,0,.5), inset 0 -3px 6px rgba(0,0,0,.25)';
-
-  // Weight label — hidden until revealed
+  el.style.boxShadow  = `0 2px 8px rgba(0,0,0,.6), inset 0 -2px 5px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.3)`;
   const lbl = document.createElement('span');
   lbl.className = 'ball-weight';
   lbl.textContent = Math.round(Math.PI * ball.r * ball.r);
-  // Font size scales with ball radius: min 7px, max 13px
   lbl.style.fontSize = Math.max(7, Math.min(13, Math.round(ball.r * 0.36))) + 'px';
   el.appendChild(lbl);
-
   el.addEventListener('mousedown', onDown);
   el.addEventListener('touchstart', onDown, { passive: false });
   ballEls[ball.id] = el;
@@ -686,23 +883,19 @@ weighBtn.addEventListener('click', function weigh() {
   const pct  = Math.round(diff / avg * 100);
   const won  = diff / avg < 0.0001;
 
-  // Animate beam
-  beam.classList.remove('anim-win','anim-left','anim-right');
-  void beam.offsetWidth;
-  if (won)             beam.classList.add('anim-win');
-  else if (lArea > rArea) beam.classList.add('anim-right'); // left heavy → left end sinks
-  else                 beam.classList.add('anim-left');     // right heavy → right end sinks
+  // Animate SVG beam group
+  beamG.classList.remove('anim-win','anim-left','anim-right');
+  void beamG.getBoundingClientRect(); // reflow
+  if (won)             beamG.classList.add('anim-win');
+  else if (lArea > rArea) beamG.classList.add('anim-right'); // left heavy → left sinks (negative rot)
+  else                 beamG.classList.add('anim-left');
 
   dead = true;
   weighBtn.disabled = true;
   weighBtn.className = '';
 
-  // Reveal weights on balls
-  Object.values(ballEls).forEach(el => {
-    el.classList.add('locked', 'revealed');
-  });
+  Object.values(ballEls).forEach(el => el.classList.add('locked', 'revealed'));
 
-  // Zone color feedback + show total weight in counter
   cntL.textContent = fmt(Math.PI * lArea);
   cntR.textContent = fmt(Math.PI * rArea);
 
@@ -716,7 +909,6 @@ weighBtn.addEventListener('click', function weigh() {
     lightZone.classList.add('zone-light', 'revealed');
   }
 
-  // Collapse staging + button, then re-layout balls into expanded zones
   appEl.classList.add('game-over');
   requestAnimationFrame(() => requestAnimationFrame(layoutAll));
 
@@ -782,7 +974,6 @@ function tickCountdown() {
 // RESTORE SAVED STATE
 // ══════════════════════════════════════════
 function applyResult(res) {
-  // Reveal balls + zone colors + totals (no animation delay)
   Object.values(ballEls).forEach(el => el.classList.add('locked', 'revealed'));
   const lBalls = balls.filter(b => b.loc === 'left');
   const rBalls = balls.filter(b => b.loc === 'right');
@@ -810,8 +1001,8 @@ function restore() {
     res.lIds.forEach(id => { const b = balls.find(b => b.id === +id); if (b) b.loc = 'left'; });
     res.rIds.forEach(id => { const b = balls.find(b => b.id === +id); if (b) b.loc = 'right'; });
     dead = true;
-    beam.style.animation = 'none';
-    if (!res.won) beam.style.transform = res.heavier === 'left' ? 'rotate(-9deg)' : 'rotate(9deg)';
+    beamG.style.animation = 'none';
+    if (!res.won) beamG.style.transform = res.heavier === 'left' ? 'rotate(-9deg)' : 'rotate(9deg)';
     applyResult(res);
     requestAnimationFrame(() => {
       layoutAll();
