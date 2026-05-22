@@ -1253,7 +1253,8 @@ function showResult(res, done, lCorrect, rCorrect) {
 function tryAgain() {
   panel.classList.remove('show', 'win');
   setTimeout(() => {
-    balls.forEach(b => b.loc = 'staging');
+    // Balls keep their current left/right positions so the player can
+    // selectively rearrange based on the correct-count feedback
     Object.values(ballEls).forEach(el => el.classList.remove('locked','revealed','sol-correct','sol-wrong'));
     zoneL.classList.remove('zone-win','zone-heavy','zone-light','revealed');
     zoneR.classList.remove('zone-win','zone-heavy','zone-light','revealed');
