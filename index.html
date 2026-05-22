@@ -74,39 +74,32 @@ html, body {
 }
 #hook-l { left: 0; transform: translateX(-50%); }
 #hook-r { right: 0; transform: translateX(50%); }
-
 #fulcrum-dot {
   position: absolute;
   bottom: 44px;
   left: 50%;
   transform: translateX(-50%);
-  width: 13px;
-  height: 13px;
+  width: 13px; height: 13px;
   background: #888;
   border-radius: 50%;
   z-index: 2;
 }
 #fulcrum-post {
   position: absolute;
-  bottom: 0;
-  left: 50%;
+  bottom: 0; left: 50%;
   transform: translateX(-50%);
-  width: 4px;
-  height: 50px;
+  width: 4px; height: 50px;
   background: #444;
   border-radius: 2px;
 }
 #base-bar {
   position: absolute;
-  bottom: 0;
-  left: 22%;
-  right: 22%;
+  bottom: 0; left: 22%; right: 22%;
   height: 3px;
   background: #2e2e2e;
   border-radius: 2px;
 }
 
-/* beam animations — no translateX needed since positioned with left/width */
 @keyframes beam-win {
   0%   { transform: rotate(0deg); }
   12%  { transform: rotate(8deg); }
@@ -146,13 +139,18 @@ html, body {
   border: 1.5px dashed #252525;
   border-radius: 10px;
   position: relative;
-  transition: border-color .15s, background .15s;
+  transition: border-color .3s, background .15s;
   overflow: hidden;
 }
 .zone.over {
   border-color: #555;
   background: rgba(255,255,255,0.025);
 }
+/* post-weigh zone colors */
+.zone.zone-win    { border-color: #2ed573; border-style: solid; }
+.zone.zone-heavy  { border-color: #ff4757; border-style: solid; }
+.zone.zone-light  { border-color: #3a3a3a; border-style: solid; }
+
 .zone-lbl {
   position: absolute;
   bottom: 8px;
@@ -163,14 +161,26 @@ html, body {
   color: #2e2e2e;
   text-transform: uppercase;
   pointer-events: none;
+  transition: color .4s;
 }
+.zone.zone-win .zone-lbl   { color: #2ed573; }
+.zone.zone-heavy .zone-lbl { color: #ff4757; }
+
 .zone-cnt {
   position: absolute;
-  top: 8px;
-  right: 10px;
+  top: 8px; right: 10px;
   font-size: 11px;
   color: #363636;
+  transition: color .4s;
 }
+
+/* total weight counter — replaces count after weigh */
+.zone-cnt {
+  transition: color .4s;
+}
+.zone.zone-win.revealed .zone-cnt   { color: #2ed573; font-weight: 700; }
+.zone.zone-heavy.revealed .zone-cnt { color: #ff4757; font-weight: 700; }
+.zone.zone-light.revealed .zone-cnt { color: #555; }
 
 /* ── Staging ── */
 #staging {
@@ -180,18 +190,31 @@ html, body {
   border-radius: 10px;
   position: relative;
   margin-bottom: 10px;
-  transition: border-color .2s;
+  transition: height .35s ease, margin .35s ease, opacity .25s ease;
+  overflow: hidden;
 }
 #staging-lbl {
   position: absolute;
-  top: 6px;
-  width: 100%;
+  top: 6px; width: 100%;
   text-align: center;
   font-size: 10px;
   letter-spacing: 2px;
   color: #2a2a2a;
   text-transform: uppercase;
   pointer-events: none;
+}
+/* collapse staging + button when game over */
+.game-over #staging {
+  height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+}
+.game-over #weigh-btn {
+  height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 /* ── Weigh button ── */
@@ -209,7 +232,7 @@ html, body {
   letter-spacing: 5px;
   text-transform: uppercase;
   cursor: not-allowed;
-  transition: border-color .2s, color .2s, box-shadow .2s;
+  transition: border-color .2s, color .2s, box-shadow .2s, height .35s ease, margin .35s ease, opacity .25s ease;
 }
 @keyframes pulse-btn {
   0%, 100% { border-color: #777; box-shadow: none; }
@@ -229,79 +252,112 @@ html, body {
   cursor: grab;
   z-index: 10;
   will-change: left, top;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .ball.dragging {
   cursor: grabbing;
   z-index: 99;
   filter: brightness(1.2);
-  transition: none;
 }
 .ball.locked { cursor: default; pointer-events: none; }
 
-/* ── Result overlay ── */
-#result {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(8, 8, 6, 0.93);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  z-index: 200;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 28px;
-  text-align: center;
-}
-#result.show { display: flex; }
-
-#r-icon { font-size: 58px; margin-bottom: 22px; }
-@keyframes icon-pulse { 0%,100%{opacity:.75;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
-#result.win #r-icon { animation: icon-pulse 2.2s ease-in-out infinite; }
-
-#r-title {
-  font-size: 23px;
+/* weight label — hidden until revealed */
+.ball-weight {
   font-weight: 900;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  margin-bottom: 10px;
+  color: rgba(255,255,255,0);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  transition: color 0.55s ease;
+  pointer-events: none;
+  line-height: 1;
+  white-space: nowrap;
 }
-#r-msg { font-size: 15px; color: #777; margin-bottom: 36px; line-height: 1.5; }
+.ball.revealed .ball-weight {
+  color: rgba(255,255,255,0.93);
+}
 
+/* ── Result panel (bottom sheet) ── */
+#result-panel {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  transform: translateY(110%);
+  background: #111110;
+  border-top: 1px solid #282826;
+  padding: 18px 24px 28px;
+  z-index: 100;
+  transition: transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+  max-width: 480px;
+  margin: 0 auto;
+}
+#result-panel.show { transform: translateY(0); }
+
+#rp-row1 {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+#rp-icon { font-size: 22px; }
+@keyframes win-pulse { 0%,100%{opacity:.8} 50%{opacity:1} }
+#result-panel.win #rp-icon { animation: win-pulse 2s ease-in-out infinite; }
+
+#rp-title {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+#rp-msg {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 16px;
+}
+#rp-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 #share-btn {
-  padding: 14px 44px;
+  flex: 1;
+  padding: 12px 0;
   background: #e8e4dc;
   color: #0f0e0c;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 7px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 3px;
   text-transform: uppercase;
   cursor: pointer;
-  margin-bottom: 12px;
   transition: background .15s;
+  position: relative;
 }
 #share-btn:active { background: #c8c4bc; }
-
 #copy-msg {
-  font-size: 12px;
+  position: absolute;
+  bottom: -18px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px;
   color: #555;
-  height: 18px;
-  margin-bottom: 30px;
 }
-#next-lbl {
-  font-size: 10px;
-  color: #3e3e3e;
-  letter-spacing: 2.5px;
+#rp-countdown {
+  text-align: right;
+}
+#rp-next-lbl {
+  font-size: 9px;
+  color: #3a3a3a;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 3px;
 }
 #countdown {
-  font-size: 30px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: 4px;
-  color: #5a5a5a;
+  letter-spacing: 3px;
+  color: #555;
   font-variant-numeric: tabular-nums;
 }
 </style>
@@ -342,14 +398,23 @@ html, body {
   <button id="weigh-btn" disabled>WEIGH IT</button>
 </div>
 
-<div id="result">
-  <div id="r-icon">⚖️</div>
-  <div id="r-title">—</div>
-  <div id="r-msg">—</div>
-  <button id="share-btn">SHARE RESULT</button>
-  <div id="copy-msg"></div>
-  <div id="next-lbl">NEXT POISE IN</div>
-  <div id="countdown">—</div>
+<!-- bottom result panel -->
+<div id="result-panel">
+  <div id="rp-row1">
+    <span id="rp-icon">⚖️</span>
+    <span id="rp-title">—</span>
+  </div>
+  <div id="rp-msg">—</div>
+  <div id="rp-actions">
+    <button id="share-btn">
+      SHARE RESULT
+      <span id="copy-msg"></span>
+    </button>
+    <div id="rp-countdown">
+      <div id="rp-next-lbl">NEXT POISE IN</div>
+      <div id="countdown">—</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -399,74 +464,54 @@ function generateBalls(dateStr) {
   const base = hashStr(dateStr);
   for (let attempt = 0; attempt < 500; attempt++) {
     const rand = rng32((base ^ (attempt * 0x45D9F3B)) >>> 0);
-    // 5 left radii
     const lR = Array.from({ length: 5 }, () => MIN_R + rand() * (MAX_R - MIN_R));
-    // 4 right radii
     const rR = Array.from({ length: 4 }, () => MIN_R + rand() * (MAX_R - MIN_R));
     const lSum = lR.reduce((s, r) => s + r * r, 0);
     const rSum4 = rR.reduce((s, r) => s + r * r, 0);
     const r5sq = lSum - rSum4;
     if (r5sq < MIN_R * MIN_R || r5sq > MAX_R * MAX_R) continue;
     rR.push(Math.sqrt(r5sq));
-    // all 10 radii in order [l0..l4, r0..r4]
     const all = [...lR, ...rR];
-    // shuffle indices
     const idx = [...Array(10).keys()];
-    for (let i = 9; i > 0; i--) {
-      const j = (rand() * (i + 1)) | 0;
-      [idx[i], idx[j]] = [idx[j], idx[i]];
-    }
-    // shuffle colors
+    for (let i = 9; i > 0; i--) { const j = (rand() * (i + 1)) | 0; [idx[i], idx[j]] = [idx[j], idx[i]]; }
     const cols = [...COLORS];
-    for (let i = 9; i > 0; i--) {
-      const j = (rand() * (i + 1)) | 0;
-      [cols[i], cols[j]] = [cols[j], cols[i]];
-    }
+    for (let i = 9; i > 0; i--) { const j = (rand() * (i + 1)) | 0; [cols[i], cols[j]] = [cols[j], cols[i]]; }
     return idx.map((orig, pos) => ({
-      id: pos,
-      r: all[orig],
-      color: cols[pos],
-      sol: orig < 5 ? 'left' : 'right',
-      loc: 'staging'
+      id: pos, r: all[orig], color: cols[pos],
+      sol: orig < 5 ? 'left' : 'right', loc: 'staging'
     }));
   }
-  // Guaranteed-balanced fallback
-  const fbR = [
-    [13,17,22,28,33],
-    [15,19,24,26,30]
-  ];
-  const allFb = [...fbR[0], ...fbR[1]];
-  return allFb.map((r, i) => ({
-    id: i, r, color: COLORS[i],
-    sol: i < 5 ? 'left' : 'right',
-    loc: 'staging'
+  // Balanced fallback
+  return [13,17,22,28,33,15,19,24,26,30].map((r, i) => ({
+    id: i, r, color: COLORS[i], sol: i < 5 ? 'left' : 'right', loc: 'staging'
   }));
 }
 
 // ══════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════
-const DATE  = todayET();
-const PNUM  = puzzleNum(DATE);
-const SKEY  = `poise_v1_${PNUM}`;
+const DATE = todayET();
+const PNUM = puzzleNum(DATE);
+const SKEY = `poise_v1_${PNUM}`;
 
-let balls   = generateBalls(DATE);
-let dead    = false;
-let drag    = null;
+let balls = generateBalls(DATE);
+let dead  = false;
+let drag  = null;
 
 // ══════════════════════════════════════════
 // DOM
 // ══════════════════════════════════════════
 const $ = id => document.getElementById(id);
-const beam     = $('beam');
-const zoneL    = $('zone-l');
-const zoneR    = $('zone-r');
+const beam      = $('beam');
+const zoneL     = $('zone-l');
+const zoneR     = $('zone-r');
 const stagingEl = $('staging');
-const weighBtn = $('weigh-btn');
-const cntL     = $('cnt-l');
-const cntR     = $('cnt-r');
-const resultEl = $('result');
-const shareBtn = $('share-btn');
+const appEl     = $('app');
+const weighBtn  = $('weigh-btn');
+const cntL      = $('cnt-l');
+const cntR      = $('cnt-r');
+const panel     = $('result-panel');
+const shareBtn  = $('share-btn');
 
 $('subtitle').textContent = `#${PNUM} · DAILY BALANCE PUZZLE`;
 
@@ -476,9 +521,9 @@ $('subtitle').textContent = `#${PNUM} · DAILY BALANCE PUZZLE`;
 const ballEls = {};
 
 function lighten(hex) {
-  const r = Math.min(255, parseInt(hex.slice(1, 3), 16) + 72);
-  const g = Math.min(255, parseInt(hex.slice(3, 5), 16) + 72);
-  const b = Math.min(255, parseInt(hex.slice(5, 7), 16) + 72);
+  const r = Math.min(255, parseInt(hex.slice(1,3),16) + 72);
+  const g = Math.min(255, parseInt(hex.slice(3,5),16) + 72);
+  const b = Math.min(255, parseInt(hex.slice(5,7),16) + 72);
   return `rgb(${r},${g},${b})`;
 }
 
@@ -491,6 +536,15 @@ function makeBall(ball) {
   el.style.height = d + 'px';
   el.style.background = `radial-gradient(circle at 37% 30%, ${lighten(ball.color)} 0%, ${ball.color} 55%, ${ball.color}bb 100%)`;
   el.style.boxShadow  = '0 3px 10px rgba(0,0,0,.5), inset 0 -3px 6px rgba(0,0,0,.25)';
+
+  // Weight label — hidden until revealed
+  const lbl = document.createElement('span');
+  lbl.className = 'ball-weight';
+  lbl.textContent = Math.round(Math.PI * ball.r * ball.r);
+  // Font size scales with ball radius: min 7px, max 13px
+  lbl.style.fontSize = Math.max(7, Math.min(13, Math.round(ball.r * 0.36))) + 'px';
+  el.appendChild(lbl);
+
   el.addEventListener('mousedown', onDown);
   el.addEventListener('touchstart', onDown, { passive: false });
   ballEls[ball.id] = el;
@@ -500,15 +554,13 @@ function makeBall(ball) {
 // ══════════════════════════════════════════
 // SLOT POSITIONS
 // ══════════════════════════════════════════
-// zone: 3 top + 2 bottom
 const ZONE_SLOTS = [
-  [.2, .37], [.5, .37], [.8, .37],
-  [.35, .67], [.65, .67]
+  [.2,.37],[.5,.37],[.8,.37],
+  [.35,.67],[.65,.67]
 ];
-// staging: 5+5 across 2 rows
 const STAGE_SLOTS = [
-  [.1, .38], [.3, .38], [.5, .38], [.7, .38], [.9, .38],
-  [.1, .73], [.3, .73], [.5, .73], [.7, .73], [.9, .73]
+  [.1,.38],[.3,.38],[.5,.38],[.7,.38],[.9,.38],
+  [.1,.73],[.3,.73],[.5,.73],[.7,.73],[.9,.73]
 ];
 
 function layoutAll() {
@@ -521,17 +573,17 @@ function layoutAll() {
     if (!el) return;
     let x, y;
     if (b.loc === 'left') {
-      const [fx, fy] = ZONE_SLOTS[li++] || [.5, .5];
-      x = lR.left + lR.width * fx - b.r;
-      y = lR.top  + lR.height * fy - b.r;
+      const [fx,fy] = ZONE_SLOTS[li++] || [.5,.5];
+      x = lR.left + lR.width*fx - b.r;
+      y = lR.top  + lR.height*fy - b.r;
     } else if (b.loc === 'right') {
-      const [fx, fy] = ZONE_SLOTS[ri++] || [.5, .5];
-      x = rR.left + rR.width * fx - b.r;
-      y = rR.top  + rR.height * fy - b.r;
+      const [fx,fy] = ZONE_SLOTS[ri++] || [.5,.5];
+      x = rR.left + rR.width*fx - b.r;
+      y = rR.top  + rR.height*fy - b.r;
     } else {
-      const [fx, fy] = STAGE_SLOTS[si++] || [.5, .5];
-      x = sR.left + sR.width * fx - b.r;
-      y = sR.top  + sR.height * fy - b.r;
+      const [fx,fy] = STAGE_SLOTS[si++] || [.5,.5];
+      x = sR.left + sR.width*fx - b.r;
+      y = sR.top  + sR.height*fy - b.r;
     }
     el.style.left = x + 'px';
     el.style.top  = y + 'px';
@@ -542,14 +594,10 @@ function layoutAll() {
 // DRAG & DROP
 // ══════════════════════════════════════════
 function getXY(e) {
-  return e.touches
-    ? [e.touches[0].clientX, e.touches[0].clientY]
-    : [e.clientX, e.clientY];
+  return e.touches ? [e.touches[0].clientX, e.touches[0].clientY] : [e.clientX, e.clientY];
 }
 function getChangedXY(e) {
-  return e.changedTouches
-    ? [e.changedTouches[0].clientX, e.changedTouches[0].clientY]
-    : [e.clientX, e.clientY];
+  return e.changedTouches ? [e.changedTouches[0].clientX, e.changedTouches[0].clientY] : [e.clientX, e.clientY];
 }
 function inRect(x, y, r) {
   return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
@@ -560,50 +608,44 @@ function onDown(e) {
   e.preventDefault();
   const el = e.currentTarget;
   const id = +el.dataset.id;
-  const [cx, cy] = getXY(e);
+  const [cx,cy] = getXY(e);
   const rect = el.getBoundingClientRect();
-  drag = {
-    id, el,
-    ox: cx - rect.left - rect.width / 2,
-    oy: cy - rect.top  - rect.height / 2
-  };
+  drag = { id, el, ox: cx - rect.left - rect.width/2, oy: cy - rect.top - rect.height/2 };
   el.classList.add('dragging');
   el.style.zIndex = 99;
 }
 
 document.addEventListener('mousemove', onMove);
 document.addEventListener('touchmove', onMove, { passive: false });
-
 function onMove(e) {
   if (!drag) return;
   e.preventDefault();
   const b = balls.find(b => b.id === drag.id);
-  const [cx, cy] = getXY(e);
+  const [cx,cy] = getXY(e);
   drag.el.style.left = (cx - drag.ox - b.r) + 'px';
   drag.el.style.top  = (cy - drag.oy - b.r) + 'px';
   const lRect = zoneL.getBoundingClientRect();
   const rRect = zoneR.getBoundingClientRect();
   const lFull = balls.filter(x => x.loc === 'left'  && x.id !== drag.id).length >= 5;
   const rFull = balls.filter(x => x.loc === 'right' && x.id !== drag.id).length >= 5;
-  zoneL.classList.toggle('over', !lFull && inRect(cx, cy, lRect));
-  zoneR.classList.toggle('over', !rFull && inRect(cx, cy, rRect));
+  zoneL.classList.toggle('over', !lFull && inRect(cx,cy,lRect));
+  zoneR.classList.toggle('over', !rFull && inRect(cx,cy,rRect));
 }
 
 document.addEventListener('mouseup', onUp);
 document.addEventListener('touchend', onUp, { passive: false });
-
 function onUp(e) {
   if (!drag) return;
   e.preventDefault();
-  const [cx, cy] = getChangedXY(e);
+  const [cx,cy] = getChangedXY(e);
   const b = balls.find(b => b.id === drag.id);
   const lRect = zoneL.getBoundingClientRect();
   const rRect = zoneR.getBoundingClientRect();
   const lCnt = balls.filter(x => x.loc === 'left'  && x.id !== drag.id).length;
   const rCnt = balls.filter(x => x.loc === 'right' && x.id !== drag.id).length;
-  if      (inRect(cx, cy, lRect) && lCnt < 5) b.loc = 'left';
-  else if (inRect(cx, cy, rRect) && rCnt < 5) b.loc = 'right';
-  else                                          b.loc = 'staging';
+  if      (inRect(cx,cy,lRect) && lCnt < 5) b.loc = 'left';
+  else if (inRect(cx,cy,rRect) && rCnt < 5) b.loc = 'right';
+  else                                        b.loc = 'staging';
   drag.el.classList.remove('dragging');
   drag.el.style.zIndex = 10;
   zoneL.classList.remove('over');
@@ -627,6 +669,8 @@ function refreshUI() {
   weighBtn.className = ready ? 'ready' : '';
 }
 
+function fmt(n) { return Math.round(n).toLocaleString(); }
+
 // ══════════════════════════════════════════
 // WEIGH
 // ══════════════════════════════════════════
@@ -634,24 +678,46 @@ weighBtn.addEventListener('click', function weigh() {
   if (dead) return;
   const lBalls = balls.filter(b => b.loc === 'left');
   const rBalls = balls.filter(b => b.loc === 'right');
-  const lArea  = lBalls.reduce((s, b) => s + b.r * b.r, 0);
-  const rArea  = rBalls.reduce((s, b) => s + b.r * b.r, 0);
+  const lArea  = lBalls.reduce((s,b) => s + b.r*b.r, 0);
+  const rArea  = rBalls.reduce((s,b) => s + b.r*b.r, 0);
   const avg  = (lArea + rArea) / 2;
   const diff = Math.abs(lArea - rArea);
   const pct  = Math.round(diff / avg * 100);
   const won  = diff / avg < 0.0001;
 
   // Animate beam
-  beam.classList.remove('anim-win', 'anim-left', 'anim-right');
-  void beam.offsetWidth; // reflow
-  if (won)        beam.classList.add('anim-win');
+  beam.classList.remove('anim-win','anim-left','anim-right');
+  void beam.offsetWidth;
+  if (won)             beam.classList.add('anim-win');
   else if (lArea > rArea) beam.classList.add('anim-left');
-  else            beam.classList.add('anim-right');
+  else                 beam.classList.add('anim-right');
 
   dead = true;
-  Object.values(ballEls).forEach(el => el.classList.add('locked'));
   weighBtn.disabled = true;
   weighBtn.className = '';
+
+  // Reveal weights on balls
+  Object.values(ballEls).forEach(el => {
+    el.classList.add('locked', 'revealed');
+  });
+
+  // Zone color feedback + show total weight in counter
+  cntL.textContent = fmt(Math.PI * lArea);
+  cntR.textContent = fmt(Math.PI * rArea);
+
+  if (won) {
+    zoneL.classList.add('zone-win', 'revealed');
+    zoneR.classList.add('zone-win', 'revealed');
+  } else {
+    const heavyZone = lArea > rArea ? zoneL : zoneR;
+    const lightZone = lArea > rArea ? zoneR : zoneL;
+    heavyZone.classList.add('zone-heavy', 'revealed');
+    lightZone.classList.add('zone-light', 'revealed');
+  }
+
+  // Collapse staging + button, then re-layout balls into expanded zones
+  appEl.classList.add('game-over');
+  requestAnimationFrame(() => requestAnimationFrame(layoutAll));
 
   const res = {
     won, pct,
@@ -664,28 +730,24 @@ weighBtn.addEventListener('click', function weigh() {
 });
 
 // ══════════════════════════════════════════
-// RESULT
+// RESULT PANEL
 // ══════════════════════════════════════════
 function showResult(res) {
-  resultEl.classList.toggle('win', res.won);
-  resultEl.classList.add('show');
+  panel.classList.toggle('win', res.won);
+  panel.classList.add('show');
   if (res.won) {
-    $('r-icon').textContent  = '✨';
-    $('r-title').textContent = 'Perfectly Poised';
-    $('r-msg').textContent   = 'The scale holds perfectly level.';
+    $('rp-icon').textContent  = '✨';
+    $('rp-title').textContent = 'Perfectly Poised';
+    $('rp-msg').textContent   = 'The scale holds perfectly level.';
   } else {
-    $('r-icon').textContent  = '⚖️';
-    $('r-title').textContent = 'Off Balance';
+    $('rp-icon').textContent  = '⚖️';
+    $('rp-title').textContent = 'Off Balance';
     const side = res.heavier === 'left' ? 'Left' : 'Right';
-    $('r-msg').textContent   = `${side} side is heavier (+${res.pct}%)`;
+    $('rp-msg').textContent   = `${side} side is heavier (+${res.pct}%)`;
   }
   shareBtn.onclick = () => doShare(res);
   tickCountdown();
-  const cdTimer = setInterval(tickCountdown, 1000);
-  // clear if overlay closed (unlikely but safe)
-  resultEl.addEventListener('click', e => {
-    if (e.target === resultEl) { /* allow clicks through */ }
-  }, { once: true });
+  setInterval(tickCountdown, 1000);
 }
 
 function doShare(res) {
@@ -696,28 +758,49 @@ function doShare(res) {
   const text = `POISE #${PNUM} ⚖️\n${line2}\n${dots} | ${dots}`;
   navigator.clipboard.writeText(text)
     .then(() => { $('copy-msg').textContent = 'Copied!'; setTimeout(() => $('copy-msg').textContent = '', 2000); })
-    .catch(() => { $('copy-msg').textContent = 'Copy failed — try again'; });
+    .catch(() => { $('copy-msg').textContent = 'Copy failed'; });
 }
 
 function tickCountdown() {
-  const now = new Date();
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/New_York',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-  }).formatToParts(now);
+  }).formatToParts(new Date());
   const h = +parts.find(p => p.type === 'hour').value;
   const m = +parts.find(p => p.type === 'minute').value;
   const s = +parts.find(p => p.type === 'second').value;
-  const rem = 86400 - (h * 3600 + m * 60 + s);
-  const rh = String(Math.floor(rem / 3600)).padStart(2, '0');
-  const rm = String(Math.floor(rem % 3600 / 60)).padStart(2, '0');
-  const rs = String(rem % 60).padStart(2, '0');
-  $('countdown').textContent = `${rh}:${rm}:${rs}`;
+  const rem = 86400 - (h*3600 + m*60 + s);
+  $('countdown').textContent = [
+    String(Math.floor(rem/3600)).padStart(2,'0'),
+    String(Math.floor(rem%3600/60)).padStart(2,'0'),
+    String(rem%60).padStart(2,'0')
+  ].join(':');
 }
 
 // ══════════════════════════════════════════
 // RESTORE SAVED STATE
 // ══════════════════════════════════════════
+function applyResult(res) {
+  // Reveal balls + zone colors + totals (no animation delay)
+  Object.values(ballEls).forEach(el => el.classList.add('locked', 'revealed'));
+  const lBalls = balls.filter(b => b.loc === 'left');
+  const rBalls = balls.filter(b => b.loc === 'right');
+  const lArea  = lBalls.reduce((s,b) => s + b.r*b.r, 0);
+  const rArea  = rBalls.reduce((s,b) => s + b.r*b.r, 0);
+  cntL.textContent = fmt(Math.PI * lArea);
+  cntR.textContent = fmt(Math.PI * rArea);
+  if (res.won) {
+    zoneL.classList.add('zone-win','revealed');
+    zoneR.classList.add('zone-win','revealed');
+  } else {
+    const heavyZone = res.heavier === 'left' ? zoneL : zoneR;
+    const lightZone = res.heavier === 'left' ? zoneR : zoneL;
+    heavyZone.classList.add('zone-heavy','revealed');
+    lightZone.classList.add('zone-light','revealed');
+  }
+  appEl.classList.add('game-over');
+}
+
 function restore() {
   const raw = localStorage.getItem(SKEY);
   if (!raw) return false;
@@ -726,17 +809,15 @@ function restore() {
     res.lIds.forEach(id => { const b = balls.find(b => b.id === +id); if (b) b.loc = 'left'; });
     res.rIds.forEach(id => { const b = balls.find(b => b.id === +id); if (b) b.loc = 'right'; });
     dead = true;
-    Object.values(ballEls).forEach(el => el.classList.add('locked'));
-    layoutAll();
-    refreshUI();
-    // Static final beam position (no animation)
     beam.style.animation = 'none';
-    if (!res.won) {
-      beam.style.transform = res.heavier === 'left' ? 'rotate(9deg)' : 'rotate(-9deg)';
-    }
-    setTimeout(() => showResult(res), 250);
+    if (!res.won) beam.style.transform = res.heavier === 'left' ? 'rotate(9deg)' : 'rotate(-9deg)';
+    applyResult(res);
+    requestAnimationFrame(() => {
+      layoutAll();
+      setTimeout(() => showResult(res), 250);
+    });
     return true;
-  } catch (e) { return false; }
+  } catch(e) { return false; }
 }
 
 // ══════════════════════════════════════════
