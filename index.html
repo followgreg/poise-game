@@ -707,7 +707,7 @@ html, body {
 <!-- Result panel -->
 <div id="result-panel">
   <div id="rp-row1">
-    <span id="rp-icon">⚖️</span>
+    <span id="rp-icon"></span>
     <span id="rp-title">—</span>
   </div>
   <div id="rp-msg">—</div>
@@ -749,7 +749,7 @@ html, body {
       <div class="inst-section-head">3 Attempts Per Day</div>
       <ul class="inst-body">
         <li>After attempts 1 and 2 you'll learn how many balls are on the correct side — but not which ones</li>
-        <li>Only a perfect split wins: <em>Perfectly Poised ✨</em></li>
+        <li>Only a perfect split wins: <em>Perfectly Poised</em></li>
         <li>A new puzzle every day</li>
       </ul>
     </div>
@@ -1145,8 +1145,8 @@ weighBtn.addEventListener('click', function weigh() {
   beamG.classList.remove('anim-win','anim-left','anim-right');
   void beamG.getBoundingClientRect();
   if (won)              beamG.classList.add('anim-win');
-  else if (lArea>rArea) beamG.classList.add('anim-right');
-  else                  beamG.classList.add('anim-left');
+  else if (lArea>rArea) beamG.classList.add('anim-left');   // left heavier → left end sinks
+  else                  beamG.classList.add('anim-right');  // right heavier → right end sinks
 
   dead = done;
   weighBtn.disabled = true; weighBtn.className = '';
@@ -1189,7 +1189,7 @@ weighBtn.addEventListener('click', function weigh() {
 // RESULT PANEL
 // ══════════════════════════════════════════
 function attemptLabel(a) {
-  if (a.won) return '✨ Perfectly Poised';
+  if (a.won) return 'Perfectly Poised';
   const dir = a.heavier === 'left' ? '⬅️' : '➡️';
   return `${dir} ${a.heavier==='left'?'Left':'Right'} heavier (+${a.pct}%)`;
 }
@@ -1197,7 +1197,7 @@ function attemptLabel(a) {
 function showResult(res, done, lCorrect, rCorrect) {
   panel.classList.toggle('win', res.won);
   panel.classList.add('show');
-  $('rp-icon').textContent = res.won ? '✨' : '⚖️';
+  $('rp-icon').textContent = '';
   if (res.won) {
     $('rp-title').textContent = 'Perfectly Poised';
     $('rp-msg').textContent   = 'The scale holds perfectly level.';
@@ -1268,7 +1268,7 @@ function tryAgain() {
 }
 
 function doShare() {
-  const lines = [`POISE #${PNUM} ⚖️`];
+  const lines = [`POISE #${PNUM}`];
   const won = attempts.some(a => a.won);
   if (won && attempts.length > 1)       lines.push(`Solved in ${attempts.length}/${MAX_TRIES}`);
   else if (!won)                         lines.push(`X/${MAX_TRIES}`);
