@@ -243,7 +243,7 @@ html, body {
 }
 .zone.zone-win.revealed .zone-cnt   { color: var(--green-bright); font-weight: 600; }
 .zone.zone-heavy.revealed .zone-cnt { color: var(--red-bright);   font-weight: 600; }
-.zone.zone-light.revealed .zone-cnt { color: var(--green-dim); }
+.zone.zone-light.revealed .zone-cnt { color: var(--green-bright); font-weight: 600; }
 
 /* ── Staging ── */
 #staging {
@@ -1336,12 +1336,19 @@ function tryAgain() {
 function doShare() {
   const lines = [`POISE #${PNUM}`];
   const won = attempts.some(a => a.won);
-  if (won && attempts.length > 1)       lines.push(`Solved in ${attempts.length}/${MAX_TRIES}`);
-  else if (!won)                         lines.push(`X/${MAX_TRIES}`);
+  if (won && attempts.length > 1)  lines.push(`Solved in ${attempts.length}/${MAX_TRIES}`);
+  else if (!won)                    lines.push(`X/${MAX_TRIES}`);
   attempts.forEach(a => lines.push(attemptLabel(a)));
-  navigator.clipboard.writeText(lines.join('\n'))
-    .then(()=>{ $('copy-msg').textContent='Copied!'; setTimeout(()=>$('copy-msg').textContent='',2000); })
-    .catch(()=>{ $('copy-msg').textContent='Copy failed'; });
+  const text = lines.join('\n');
+
+  if (navigator.share) {
+    navigator.share({ text })
+      .catch(() => {}); // user cancelled — silent
+  } else {
+    navigator.clipboard.writeText(text)
+      .then(()=>{ $('copy-msg').textContent='Copied!'; setTimeout(()=>$('copy-msg').textContent='',2000); })
+      .catch(()=>{ $('copy-msg').textContent='Copy failed'; });
+  }
 }
 
 function tickCountdown() {
