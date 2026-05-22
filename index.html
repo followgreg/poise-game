@@ -50,6 +50,7 @@ html, body {
   padding: 12px 0 4px;
   text-align: center;
   flex-shrink: 0;
+  position: relative;
 }
 .rule {
   display: flex;
@@ -483,12 +484,164 @@ html, body {
   letter-spacing: 3px; color: var(--green);
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Attempt feedback (correct counts) ── */
+#rp-feedback {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--green);
+  margin-bottom: 12px;
+  line-height: 1.75;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+/* ── Final-reveal: per-ball correct/wrong indicators ── */
+.ball.sol-correct { box-shadow: 0 3px 12px rgba(0,0,0,.7), inset 0 -2px 5px rgba(0,0,0,.25), 0 0 0 2.5px #6aaa3a !important; }
+.ball.sol-wrong   { box-shadow: 0 3px 12px rgba(0,0,0,.7), inset 0 -2px 5px rgba(0,0,0,.25), 0 0 0 2.5px #c04030 !important; }
+
+/* ── ? Help button ── */
+#help-btn {
+  position: absolute;
+  top: 13px; right: 0;
+  width: 22px; height: 22px;
+  background: transparent;
+  border: 1px solid var(--green-text);
+  color: var(--green-text);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  transition: background .15s;
+  line-height: 1;
+  padding: 0;
+}
+#help-btn:active { background: rgba(75,122,47,.15); }
+
+/* ── Instructions overlay ── */
+#instructions {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: #050a03;
+  background-image:
+    repeating-linear-gradient( 45deg, transparent 0, transparent 14px, rgba(75,122,47,.025) 14px, rgba(75,122,47,.025) 15px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 14px, rgba(75,122,47,.025) 14px, rgba(75,122,47,.025) 15px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  padding: 22px 20px 40px;
+}
+#inst-close {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  color: var(--green-text);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px 6px;
+  opacity: .7;
+}
+#inst-close:active { opacity: 1; }
+#inst-inner {
+  width: 100%;
+  max-width: 440px;
+}
+#inst-title {
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 14px;
+  text-indent: 14px;
+  text-transform: uppercase;
+  color: var(--green-text);
+  text-shadow: 0 0 24px rgba(106,170,58,.2);
+  text-align: center;
+  margin-bottom: 2px;
+}
+#inst-sub {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 9px;
+  color: var(--green-text);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.inst-rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 18px;
+}
+.inst-rule::before, .inst-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green-text) 30%, var(--green-text) 70%, transparent);
+}
+.inst-rule-diamond {
+  width: 5px; height: 5px;
+  background: var(--green-text);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.inst-section {
+  margin-bottom: 20px;
+}
+.inst-section-head {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 8px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green-text);
+  margin-bottom: 8px;
+}
+.inst-body {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--green);
+  list-style: none;
+  padding: 0;
+}
+.inst-body li {
+  padding-left: 18px;
+  position: relative;
+  margin-bottom: 2px;
+}
+.inst-body li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--green-text);
+}
+#play-btn {
+  width: 100%;
+  padding: 14px 0;
+  margin-top: 4px;
+  background: transparent;
+  border: 1px solid var(--green-text);
+  color: var(--green-text);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 6px; text-indent: 6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s;
+}
+#play-btn:active { background: rgba(75,122,47,.12); }
 </style>
 </head>
 <body>
 
 <div id="app">
   <div id="header">
+    <button id="help-btn" aria-label="How to play">?</button>
     <div id="title">Poise</div>
     <div class="rule"><div class="rule-diamond"></div></div>
     <div id="subtitle">#1 · Daily Balance Puzzle</div>
@@ -558,6 +711,7 @@ html, body {
     <span id="rp-title">—</span>
   </div>
   <div id="rp-msg">—</div>
+  <div id="rp-feedback" style="display:none"></div>
   <div id="rp-history"></div>
   <div id="rp-actions">
     <button id="try-again-btn" style="display:none">Try Again</button>
@@ -566,6 +720,42 @@ html, body {
       <div id="rp-next-lbl">Next Poise in</div>
       <div id="countdown">—</div>
     </div>
+  </div>
+</div>
+
+<!-- Instructions overlay -->
+<div id="instructions" style="display:none">
+  <button id="inst-close" style="display:none">×</button>
+  <div id="inst-inner">
+    <div id="inst-title">Poise</div>
+    <div id="inst-sub">Daily Balance Puzzle</div>
+    <div class="inst-rule"><div class="inst-rule-diamond"></div></div>
+
+    <div class="inst-section">
+      <div class="inst-section-head">The Challenge</div>
+      <div class="inst-body">Balance all 10 balls perfectly across two plates of a scale — so both sides weigh exactly the same.</div>
+    </div>
+
+    <div class="inst-section">
+      <div class="inst-section-head">How to Play</div>
+      <ul class="inst-body">
+        <li>Drag exactly 5 balls to the Left plate and 5 to the Right</li>
+        <li>Tap <em>Weigh It</em> once all 10 balls are placed</li>
+        <li>Bigger circles are heavier — weight equals the circle's area, not its diameter</li>
+      </ul>
+    </div>
+
+    <div class="inst-section">
+      <div class="inst-section-head">3 Attempts Per Day</div>
+      <ul class="inst-body">
+        <li>After attempts 1 and 2 you'll learn how many balls are on the correct side — but not which ones</li>
+        <li>Only a perfect split wins: <em>Perfectly Poised ✨</em></li>
+        <li>A new puzzle every day</li>
+      </ul>
+    </div>
+
+    <div class="inst-rule"><div class="inst-rule-diamond"></div></div>
+    <button id="play-btn">Play</button>
   </div>
 </div>
 
@@ -948,6 +1138,10 @@ weighBtn.addEventListener('click', function weigh() {
   attempts.push(res);
   const done = won || attempts.length >= MAX_TRIES;
 
+  // Correct ball counts for intermediate feedback
+  const lCorrect = lBalls.filter(b => b.sol === 'left').length;
+  const rCorrect = rBalls.filter(b => b.sol === 'right').length;
+
   beamG.classList.remove('anim-win','anim-left','anim-right');
   void beamG.getBoundingClientRect();
   if (won)              beamG.classList.add('anim-win');
@@ -956,20 +1150,39 @@ weighBtn.addEventListener('click', function weigh() {
 
   dead = done;
   weighBtn.disabled = true; weighBtn.className = '';
-  Object.values(ballEls).forEach(el => el.classList.add('locked','revealed'));
-  cntL.textContent = fmt(Math.PI*lArea);
-  cntR.textContent = fmt(Math.PI*rArea);
+
+  // Weights only revealed on win or final attempt
+  Object.values(ballEls).forEach(el => {
+    el.classList.add('locked');
+    if (done) el.classList.add('revealed');
+  });
+  if (done) {
+    cntL.textContent = fmt(Math.PI*lArea);
+    cntR.textContent = fmt(Math.PI*rArea);
+    // Final fail: mark each ball correct (green ring) or wrong (red ring)
+    if (!won) {
+      Object.values(ballEls).forEach(el => {
+        const b = balls.find(b => b.id === +el.dataset.id);
+        el.classList.add(b.loc === b.sol ? 'sol-correct' : 'sol-wrong');
+      });
+    }
+  }
+
   if (won) {
-    zoneL.classList.add('zone-win','revealed');
-    zoneR.classList.add('zone-win','revealed');
+    zoneL.classList.add('zone-win');
+    zoneR.classList.add('zone-win');
+    if (done) { zoneL.classList.add('revealed'); zoneR.classList.add('revealed'); }
   } else {
-    (lArea>rArea ? zoneL : zoneR).classList.add('zone-heavy','revealed');
-    (lArea>rArea ? zoneR : zoneL).classList.add('zone-light','revealed');
+    const heavyZone = lArea>rArea ? zoneL : zoneR;
+    const lightZone = lArea>rArea ? zoneR : zoneL;
+    heavyZone.classList.add('zone-heavy');
+    lightZone.classList.add('zone-light');
+    if (done) { heavyZone.classList.add('revealed'); lightZone.classList.add('revealed'); }
   }
   if (done) appEl.classList.add('game-over');
   requestAnimationFrame(() => requestAnimationFrame(layoutAll));
   localStorage.setItem(SKEY, JSON.stringify({ attempts, done }));
-  setTimeout(() => showResult(res, done), won ? 1600 : 900);
+  setTimeout(() => showResult(res, done, lCorrect, rCorrect), won ? 1600 : 900);
 });
 
 // ══════════════════════════════════════════
@@ -981,7 +1194,7 @@ function attemptLabel(a) {
   return `${dir} ${a.heavier==='left'?'Left':'Right'} heavier (+${a.pct}%)`;
 }
 
-function showResult(res, done) {
+function showResult(res, done, lCorrect, rCorrect) {
   panel.classList.toggle('win', res.won);
   panel.classList.add('show');
   $('rp-icon').textContent = res.won ? '✨' : '⚖️';
@@ -994,6 +1207,18 @@ function showResult(res, done) {
   } else {
     $('rp-title').textContent = 'Off Balance';
     $('rp-msg').textContent   = `${res.heavier==='left'?'Left':'Right'} side is heavier (+${res.pct}%)`;
+  }
+
+  // Correct-count feedback — only on intermediate failed attempts
+  const feedEl = $('rp-feedback');
+  if (!res.won && !done && lCorrect !== undefined) {
+    feedEl.innerHTML =
+      `${lCorrect} of 5 balls on the left are correct<br>` +
+      `${rCorrect} of 5 balls on the right are correct`;
+    feedEl.style.display = '';
+  } else {
+    feedEl.innerHTML = '';
+    feedEl.style.display = 'none';
   }
 
   // History: show all previous attempts (not the current one)
@@ -1029,7 +1254,7 @@ function tryAgain() {
   panel.classList.remove('show', 'win');
   setTimeout(() => {
     balls.forEach(b => b.loc = 'staging');
-    Object.values(ballEls).forEach(el => el.classList.remove('locked','revealed'));
+    Object.values(ballEls).forEach(el => el.classList.remove('locked','revealed','sol-correct','sol-wrong'));
     zoneL.classList.remove('zone-win','zone-heavy','zone-light','revealed');
     zoneR.classList.remove('zone-win','zone-heavy','zone-light','revealed');
     beamG.classList.remove('anim-win','anim-left','anim-right');
@@ -1071,17 +1296,32 @@ function tickCountdown() {
 // RESTORE
 // ══════════════════════════════════════════
 function applyResult(res, done) {
-  Object.values(ballEls).forEach(el => el.classList.add('locked','revealed'));
-  const lA = balls.filter(b=>b.loc==='left').reduce((s,b)=>s+b.r*b.r,0);
-  const rA = balls.filter(b=>b.loc==='right').reduce((s,b)=>s+b.r*b.r,0);
-  cntL.textContent = fmt(Math.PI*lA);
-  cntR.textContent = fmt(Math.PI*rA);
+  Object.values(ballEls).forEach(el => {
+    el.classList.add('locked');
+    if (done) el.classList.add('revealed');
+  });
+  if (done) {
+    const lA = balls.filter(b=>b.loc==='left').reduce((s,b)=>s+b.r*b.r,0);
+    const rA = balls.filter(b=>b.loc==='right').reduce((s,b)=>s+b.r*b.r,0);
+    cntL.textContent = fmt(Math.PI*lA);
+    cntR.textContent = fmt(Math.PI*rA);
+    if (!res.won) {
+      Object.values(ballEls).forEach(el => {
+        const b = balls.find(b => b.id === +el.dataset.id);
+        el.classList.add(b.loc === b.sol ? 'sol-correct' : 'sol-wrong');
+      });
+    }
+  }
   if (res.won) {
-    zoneL.classList.add('zone-win','revealed');
-    zoneR.classList.add('zone-win','revealed');
+    zoneL.classList.add('zone-win');
+    zoneR.classList.add('zone-win');
+    if (done) { zoneL.classList.add('revealed'); zoneR.classList.add('revealed'); }
   } else {
-    (res.heavier==='left' ? zoneL : zoneR).classList.add('zone-heavy','revealed');
-    (res.heavier==='left' ? zoneR : zoneL).classList.add('zone-light','revealed');
+    const heavyZone = res.heavier==='left' ? zoneL : zoneR;
+    const lightZone = res.heavier==='left' ? zoneR : zoneL;
+    heavyZone.classList.add('zone-heavy');
+    lightZone.classList.add('zone-light');
+    if (done) { heavyZone.classList.add('revealed'); lightZone.classList.add('revealed'); }
   }
   if (done) appEl.classList.add('game-over');
 }
@@ -1110,7 +1350,12 @@ function restore() {
     beamG.style.animation = 'none';
     if (!lastRes.won) beamG.style.transform = lastRes.heavier==='left' ? 'rotate(-9deg)' : 'rotate(9deg)';
     applyResult(lastRes, done);
-    requestAnimationFrame(() => { layoutAll(); setTimeout(()=>showResult(lastRes, done), 250); });
+    requestAnimationFrame(() => {
+      layoutAll();
+      const lCorr = balls.filter(b => b.loc==='left'  && b.sol==='left').length;
+      const rCorr = balls.filter(b => b.loc==='right' && b.sol==='right').length;
+      setTimeout(() => showResult(lastRes, done, lCorr, rCorr), 250);
+    });
     return true;
   } catch(e) { return false; }
 }
@@ -1124,6 +1369,32 @@ requestAnimationFrame(() => {
   layoutAll();
   if (!restore()) refreshUI();
 });
+
+// ══════════════════════════════════════════
+// INSTRUCTIONS
+// ══════════════════════════════════════════
+const INST_KEY  = 'poise_instructions_seen';
+const instEl    = $('instructions');
+const instClose = $('inst-close');
+const playBtn   = $('play-btn');
+const helpBtn   = $('help-btn');
+
+function showInstructions(fromHelp) {
+  instClose.style.display = fromHelp ? '' : 'none';
+  instEl.style.display = 'flex';
+}
+function hideInstructions() {
+  instEl.style.display = 'none';
+  localStorage.setItem(INST_KEY, '1');
+}
+
+playBtn.addEventListener('click', hideInstructions);
+instClose.addEventListener('click', hideInstructions);
+helpBtn.addEventListener('click', () => showInstructions(true));
+
+// Auto-show on first ever visit
+if (!localStorage.getItem(INST_KEY)) showInstructions(false);
 </script>
+
 </body>
 </html>
