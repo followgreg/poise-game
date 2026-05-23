@@ -1302,7 +1302,8 @@ function doShare() {
   const won = attempts.some(a => a.won);
   if (won && attempts.length > 1)  lines.push(`Solved in ${attempts.length}/${MAX_TRIES}`);
   else if (!won)                    lines.push(`X/${MAX_TRIES}`);
-  attempts.forEach(a => lines.push(attemptLabel(a)));
+  attempts.forEach(a => lines.push(a.won ? '⚖️ Perfectly Poised' : attemptLabel(a)));
+  lines.push('https://followgreg.github.io/poise-game');
   const text = lines.join('\n');
 
   if (navigator.share) {
